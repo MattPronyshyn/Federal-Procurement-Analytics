@@ -84,12 +84,10 @@ Competitive share is **value-based**, not the percentage of contract records awa
 
 ## Explore the interactive report
 
-1. Download `Federal_Procurement_Analytics.pbix` using GitHub's download option.
+1. Download `Federal_Procurement_Analytics.pbix`.
 2. Open it in a current version of Power BI Desktop on Windows.
 3. Use the slicers to select reporting periods, organizations, or commodity types.
 4. Clear selections to return to the full dataset.
-
-GitHub displays the project documentation and preview; the interactive report runs in Power BI Desktop. The saved PBIX contains imported data and can normally be explored without refreshing.
 
 ## Data source and interpretation
 
