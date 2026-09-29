@@ -1,0 +1,104 @@
+// Core activity measures
+Disclosed Activity =
+SUM ( FactContracts[ActivityValue] )
+
+New Contract Value =
+SUM ( FactContracts[NewContractValue] )
+
+Net Amendment Value =
+SUM ( FactContracts[AmendmentValue] )
+
+Absolute Amendment Value =
+SUM ( FactContracts[AbsoluteAmendmentValue] )
+
+New Contracts =
+CALCULATE (
+    COUNTROWS ( FactContracts ),
+    FactContracts[InstrumentType] = "Contract"
+)
+
+Amendment Records =
+CALCULATE (
+    COUNTROWS ( FactContracts ),
+    FactContracts[InstrumentType] = "Amendment"
+)
+
+Average New Contract Value =
+DIVIDE ( [New Contract Value], [New Contracts] )
+
+Active Vendors =
+CALCULATE (
+    DISTINCTCOUNT ( FactContracts[VendorKey] ),
+    FactContracts[ActivityValue] <> 0
+)
+
+// Sourcing measures
+Competitive Activity =
+CALCULATE (
+    [Disclosed Activity],
+    FactContracts[IsCompetitive] = TRUE ()
+)
+
+Competitive Activity Share =
+DIVIDE ( [Competitive Activity], [Disclosed Activity] )
+
+Non-Competitive Activity =
+CALCULATE (
+    [Disclosed Activity],
+    FactContracts[IsNonCompetitive] = TRUE ()
+)
+
+Non-Competitive Activity Share =
+DIVIDE ( [Non-Competitive Activity], [Disclosed Activity] )
+
+Domestic Vendor Activity Share =
+DIVIDE (
+    CALCULATE ( [Disclosed Activity], FactContracts[IsDomesticVendor] = TRUE () ),
+    [Disclosed Activity]
+)
+
+Indigenous Procurement Activity Share =
+DIVIDE (
+    CALCULATE ( [Disclosed Activity], FactContracts[IsIndigenousProcurement] = TRUE () ),
+    [Disclosed Activity]
+)
+
+// Concentration and amendment measures
+Top 10 Vendor Activity =
+VAR TopVendors =
+    TOPN (
+        10,
+        ADDCOLUMNS (
+            ALLSELECTED ( DimVendor[VendorName] ),
+            "VendorActivity", [Disclosed Activity]
+        ),
+        [VendorActivity], DESC,
+        DimVendor[VendorName], ASC
+    )
+RETURN
+    SUMX ( TopVendors, [VendorActivity] )
+
+Top 10 Vendor Activity Share =
+DIVIDE ( [Top 10 Vendor Activity], [Disclosed Activity] )
+
+Amendment Activity Ratio =
+DIVIDE ( [Absolute Amendment Value], [New Contract Value] )
+
+Previous Fiscal Year Activity =
+CALCULATE ( [Disclosed Activity], DATEADD ( DimDate[Date], -1, YEAR ) )
+
+Fiscal Year Activity Change =
+[Disclosed Activity] - [Previous Fiscal Year Activity]
+
+Fiscal Year Activity Change Percent =
+DIVIDE ( [Fiscal Year Activity Change], [Previous Fiscal Year Activity] )
+
+// Data-quality measures
+Missing Solicitation Records =
+CALCULATE (
+    COUNTROWS ( FactContracts ),
+    FactContracts[MissingSolicitation] = TRUE ()
+)
+
+Complete Solicitation Share =
+1 - DIVIDE ( [Missing Solicitation Records], COUNTROWS ( FactContracts ) )
